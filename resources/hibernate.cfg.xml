@@ -8,8 +8,9 @@
         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/ovchip</property>
         <property name="hibernate.connection.username">postgres</property>
         <property name="hibernate.connection.password">geheim</property>
-        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.show_sql">false</property>
 
         <mapping class="domain.Reiziger"/>
+        <mapping class="domain.Adres"/>
     </session-factory>
 </hibernate-configuration>

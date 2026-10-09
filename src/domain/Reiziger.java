@@ -1,13 +1,30 @@
 package domain;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "reiziger")
 public class Reiziger {
+
+    @Id
+    @Column(name = "reiziger_id")
     private int id;
+
+    @Column(name = "voorletters")
     private String voorletters;
+
+    @Column(name = "tussenvoegsel")
     private String tussenvoegsel;
+
+    @Column(name = "achternaam")
     private String achternaam;
+
+    @Column(name = "geboortedatum")
     private LocalDate geboortedatum;
+
+    public Reiziger() {}
 
     public Reiziger(int reiziger_id, String voorletters, String tussenvoegsel, String achternaam, LocalDate geboortedatum) {
         this.id = reiziger_id;

@@ -1,7 +1,6 @@
 import dao.ReizigerDAO;
-import daopsql.ReizigerDAOPsql;
+import daohibernate.ReizigerDAOHibernate;
 import domain.Reiziger;
-import util.DatabaseConnection;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -9,32 +8,9 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-
-        try(Connection myConn = DatabaseConnection.getConnection()){
-
-            Statement myStmt = myConn.createStatement();
-            ResultSet myRs = myStmt.executeQuery("SELECT * FROM reiziger");
-
-            System.out.println("Alle reizigers:");
-            int nummer = 0;
-
-            while(myRs.next()){
-                nummer ++;
-
-                String voorletters = myRs.getString("voorletters");
-                String achternaam = myRs.getString("achternaam");
-                String geboortedatum = myRs.getString("geboortedatum");
-                String tussenvoegsel = (myRs.getString("tussenvoegsel") != null) ? myRs.getString("tussenvoegsel") + " " : "";
-
-                System.out.println("#" + nummer + ": " + voorletters + ". " + tussenvoegsel + achternaam + " (" + geboortedatum + ")");
-
-
-            }
-
-            System.out.println("\n\nTest P2:");
-            ReizigerDAO dao = new ReizigerDAOPsql(myConn);
+        ReizigerDAOHibernate dao = new ReizigerDAOHibernate();
+        try{
             testReizigerDAO(dao);
-
         } catch (SQLException e){
             e.printStackTrace();
         }

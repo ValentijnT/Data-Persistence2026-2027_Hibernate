@@ -1,8 +1,11 @@
 import dao.AdresDAO;
+import dao.OVChipkaartDAO;
 import daohibernate.AdresDAOHibernate;
 import dao.ReizigerDAO;
+import daohibernate.OVChipkaartDAOHibernate;
 import daohibernate.ReizigerDAOHibernate;
 import domain.Adres;
+import domain.OVChipkaart;
 import domain.Reiziger;
 import util.HibernateUtil;
 
@@ -13,9 +16,11 @@ public class Main {
     public static void main(String[] args) {
         ReizigerDAO rdao = new ReizigerDAOHibernate();
         AdresDAO adao = new AdresDAOHibernate();
+        OVChipkaartDAO odao = new OVChipkaartDAOHibernate();
         try {
             testReizigerDAO(rdao);
             testAdresDAO(rdao, adao);
+            testOVChipkaartDAO(rdao, odao);
         } finally {
             HibernateUtil.shutdown();
         }
@@ -112,5 +117,85 @@ public class Main {
         for (Adres a : adao.findAll()) {
             System.out.println(a);
         }
+    }
+
+    private static void testOVChipkaartDAO(ReizigerDAO rdao, OVChipkaartDAO odao) {
+        System.out.println("\n---------- Test OVChipkaartDAO -------------");
+
+        // Tijdelijke reiziger
+        Reiziger reiziger1 = new Reiziger(80, "K", null, "Kaarthouder", LocalDate.of(2000, 1, 1));
+        rdao.save(reiziger1);
+
+        // save
+        OVChipkaart kaart = new OVChipkaart(92001, LocalDate.of(2030, 12, 31), 2, 25.50, reiziger1);
+        System.out.println("[Test] Eerst " + odao.findByReiziger(reiziger1).size() + " kaarten, na OVChipkaartDAO.save():");
+        odao.save(kaart);
+        for (OVChipkaart k : odao.findByReiziger(reiziger1)) {
+            System.out.println(k);
+        }
+
+        // update
+        System.out.println("\n[Test] Saldo en klasse wijzigen via OVChipkaartDAO.update():");
+        kaart.setSaldo(75.00);
+        kaart.setKlasse(1);
+        odao.update(kaart);
+        for (OVChipkaart k : odao.findByReiziger(reiziger1)) {
+            System.out.println(k);
+        }
+
+        // delete
+        System.out.println("\n[Test] Kaart verwijderen via OVChipkaartDAO.delete():");
+        odao.delete(kaart);
+        System.out.println("Kaarten na delete: " + odao.findByReiziger(reiziger1).size());
+
+        // de reiziger weer weghalen
+        rdao.delete(reiziger1);
+        System.out.println("Reiziger opgeruimd: " + rdao.findById(80));
+
+        System.out.println("\n---------- Test relatie Reiziger - OVChipkaart -------------");
+
+        // 1. Reiziger met twee kaarten aanmaken
+        Reiziger reiziger = new Reiziger(81, "R", null, "Relatie", LocalDate.of(1999, 5, 5));
+        reiziger.addOVChipkaart(new OVChipkaart(93001, LocalDate.of(2030, 1, 1), 2, 10.00, reiziger));
+        reiziger.addOVChipkaart(new OVChipkaart(93002, LocalDate.of(2031, 1, 1), 1, 20.00, reiziger));
+
+        System.out.println("[Test] Reiziger met 2 kaarten opslaan via ReizigerDAO.save():");
+        rdao.save(reiziger);
+        System.out.println(rdao.findById(81));
+
+        // 2. Een kaart updaten
+        System.out.println("\n[Test] Saldo van een kaart wijzigen via ReizigerDAO.update():");
+        Reiziger geladen = rdao.findById(81);
+        geladen.getOVchipkaarten().get(0).setSaldo(99.00);
+        rdao.update(geladen);
+        System.out.println(rdao.findById(81));
+
+        // 3. Een derde kaart toevoegen
+        System.out.println("\n[Test] Derde kaart toevoegen via addOVChipkaart() en ReizigerDAO.update():");
+        geladen = rdao.findById(81);
+        geladen.addOVChipkaart(new OVChipkaart(93003, LocalDate.of(2032, 1, 1), 2, 5.00, geladen));
+        rdao.update(geladen);
+        System.out.println(rdao.findById(81));
+        System.out.println("Kaarten in de database: " + odao.findByReiziger(reiziger).size());
+
+        // 4. Een kaart uit de lijst verwijderen
+        System.out.println("\n[Test] Kaart 93003 uit de lijst halen en ReizigerDAO.update():");
+        geladen = rdao.findById(81);
+        geladen.getOVchipkaarten().removeIf(k -> k.getKaartNummer() == 93003);
+        rdao.update(geladen);
+        System.out.println(rdao.findById(81));
+
+        // 5. kaarten ophalen en de reiziger controleren
+        System.out.println("\n[Test] OVChipkaartDAO.findByReiziger() geeft kaarten met reiziger-id:");
+        for (OVChipkaart k : odao.findByReiziger(reiziger)) {
+            System.out.println(k);
+        }
+
+        // 6. Reiziger verwijderen, alle kaarten moeten mee
+        System.out.println("\n[Test] Reiziger verwijderen, de kaarten moeten mee:");
+        rdao.delete(rdao.findById(81));
+        System.out.println("Reiziger: " + rdao.findById(81));
+        System.out.println("Kaarten in de database: " + odao.findByReiziger(reiziger).size());
+
     }
 }

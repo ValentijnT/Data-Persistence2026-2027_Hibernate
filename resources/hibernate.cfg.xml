@@ -12,5 +12,6 @@
 
         <mapping class="domain.Reiziger"/>
         <mapping class="domain.Adres"/>
+        <mapping class="domain.OVChipkaart"/>
     </session-factory>
 </hibernate-configuration>

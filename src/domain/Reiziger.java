@@ -3,6 +3,8 @@ package domain;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "reiziger")
@@ -27,6 +29,9 @@ public class Reiziger {
     @OneToOne(mappedBy = "reiziger", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Adres adres;
 
+    @OneToMany(mappedBy = "reiziger", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<OVChipkaart> ovChipkaarten = new ArrayList<>();
+
     public Reiziger() {}
 
     public Reiziger(int reiziger_id, String voorletters, String tussenvoegsel, String achternaam, LocalDate geboortedatum) {
@@ -43,7 +48,7 @@ public class Reiziger {
     public String getAchternaam() { return achternaam; }
     public LocalDate getGeboortedatum() { return geboortedatum; }
     public Adres getAdres() { return adres; }
-
+    public List<OVChipkaart> getOVchipkaarten() {return ovChipkaarten;}
 
     public void setId(int id) { this.id = id; }
     public void setVoorletters(String voorletters) { this.voorletters = voorletters; }
@@ -52,6 +57,12 @@ public class Reiziger {
     public void setGeboortedatum(LocalDate geboortedatum) { this.geboortedatum = geboortedatum; }
     public void setAdres(Adres adres) { this.adres = adres; }
 
+    public void addOVChipkaart(OVChipkaart ovChipkaart) {
+        ovChipkaarten.add(ovChipkaart);
+        ovChipkaart.setReiziger(this);
+    }
+
+
     public String getNaam(){
         String tv = (tussenvoegsel != null) ? tussenvoegsel + " " : "";
         return voorletters + ". " + tv + achternaam;
@@ -59,7 +70,19 @@ public class Reiziger {
 
     public String toString() {
         String adresString = (adres != null) ? ", Adres: " + adres : "";
-        return  "Reiziger {#" + getId() + ": " + getNaam() + " (" + geboortedatum + ")" + adresString + "}";
+
+        StringBuilder sb = new StringBuilder();
+        if (ovChipkaarten != null && !ovChipkaarten.isEmpty()) {
+            sb.append("\nOVChipkaarten:\n");
+            for (OVChipkaart ov : ovChipkaarten) {
+                sb.append(ov.toString()).append("\n");
+            }
+        } else {
+            sb.append("\nOVChipkaarten: Geen\n");
+        }
+        String OVChipkaartString = sb.toString();
+
+        return  "Reiziger {#" + getId() + ": " + getNaam() + " (" + geboortedatum + ")" + adresString + "}" + OVChipkaartString;
     }
 
 }

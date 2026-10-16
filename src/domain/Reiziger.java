@@ -24,7 +24,7 @@ public class Reiziger {
     @Column(name = "geboortedatum")
     private LocalDate geboortedatum;
 
-    @OneToOne(mappedBy = "reiziger", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "reiziger", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Adres adres;
 
     public Reiziger() {}

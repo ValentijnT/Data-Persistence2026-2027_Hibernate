@@ -26,10 +26,10 @@ public class Reiziger {
     @Column(name = "geboortedatum")
     private LocalDate geboortedatum;
 
-    @OneToOne(mappedBy = "reiziger", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(mappedBy = "reiziger", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Adres adres;
 
-    @OneToMany(mappedBy = "reiziger", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "reiziger", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<OVChipkaart> ovChipkaarten = new ArrayList<>();
 
     public Reiziger() {}
